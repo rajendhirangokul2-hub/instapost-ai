@@ -24,7 +24,7 @@ const Index = () => {
     }
     setIsGenerating(true);
     try {
-      const post = await generatePost(template, keywords);
+      const post = await generatePost(template, keywords, brandKit ?? undefined);
       setGenerated(post);
       toast.success("Post generated successfully!");
     } catch {
