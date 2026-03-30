@@ -1,15 +1,20 @@
 import { motion, AnimatePresence } from "framer-motion";
-import { Download, Share2, Loader2 } from "lucide-react";
+import { Download, Share2, Loader2, Bookmark } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { GeneratedPost, SocialFormat } from "@/types/post";
 import { useRef } from "react";
 import { toPng } from "html-to-image";
 import { toast } from "sonner";
+import { useAuth } from "@/hooks/useAuth";
+import { supabase } from "@/integrations/supabase/client";
 
 interface Props {
   post: GeneratedPost | null;
   format: SocialFormat;
   isGenerating: boolean;
+  templateId?: string;
+  templateName?: string;
+  keywords?: string;
 }
 
 const aspectRatios: Record<SocialFormat, string> = {
@@ -18,8 +23,9 @@ const aspectRatios: Record<SocialFormat, string> = {
   twitter: "aspect-[1200/675]",
 };
 
-const PostCanvas = ({ post, format, isGenerating }: Props) => {
+const PostCanvas = ({ post, format, isGenerating, templateId, templateName, keywords }: Props) => {
   const canvasRef = useRef<HTMLDivElement>(null);
+  const { user } = useAuth();
 
   const handleDownload = async () => {
     if (!canvasRef.current) return;
@@ -32,6 +38,34 @@ const PostCanvas = ({ post, format, isGenerating }: Props) => {
       toast.success("Post downloaded successfully!");
     } catch {
       toast.error("Failed to download. Try again.");
+    }
+  };
+
+  const handleSave = async () => {
+    if (!user) {
+      toast.error("Sign in to save posts");
+      return;
+    }
+    if (!post || !templateId) return;
+
+    const { error } = await supabase.from("saved_posts").insert({
+      user_id: user.id,
+      template_id: templateId,
+      template_name: templateName || "Unknown",
+      format,
+      keywords: keywords || "",
+      headline: post.headline,
+      subtext: post.subtext,
+      cta: post.cta,
+      colors: post.colors as any,
+      layout: post.layout,
+      font_style: post.fontStyle,
+    });
+
+    if (error) {
+      toast.error("Failed to save post");
+    } else {
+      toast.success("Post saved!");
     }
   };
 
@@ -61,12 +95,10 @@ const PostCanvas = ({ post, format, isGenerating }: Props) => {
               className="absolute inset-0 flex flex-col items-center justify-center p-8 sm:p-12 rounded-xl"
               style={{ backgroundColor: post.colors.bg }}
             >
-              {/* Decorative accent bar */}
               <div
                 className="absolute top-0 left-0 h-1.5 w-full"
                 style={{ backgroundColor: post.colors.accent }}
               />
-
               <div
                 className={`flex flex-1 flex-col gap-5 w-full ${
                   post.layout === "centered"
@@ -91,14 +123,12 @@ const PostCanvas = ({ post, format, isGenerating }: Props) => {
                 >
                   {post.headline}
                 </h2>
-
                 <p
                   className="max-w-md text-sm sm:text-base leading-relaxed opacity-85"
                   style={{ color: post.colors.text }}
                 >
                   {post.subtext}
                 </p>
-
                 <button
                   className="mt-2 rounded-lg px-6 py-2.5 text-sm font-bold uppercase tracking-wide transition-transform hover:scale-105"
                   style={{
@@ -111,8 +141,6 @@ const PostCanvas = ({ post, format, isGenerating }: Props) => {
                   {post.cta}
                 </button>
               </div>
-
-              {/* Watermark */}
               <div
                 className="absolute bottom-3 right-4 text-xs font-medium opacity-30"
                 style={{ color: post.colors.text }}
@@ -136,7 +164,6 @@ const PostCanvas = ({ post, format, isGenerating }: Props) => {
         </AnimatePresence>
       </div>
 
-      {/* Actions */}
       {post && !isGenerating && (
         <motion.div
           initial={{ opacity: 0, y: 10 }}
@@ -145,6 +172,13 @@ const PostCanvas = ({ post, format, isGenerating }: Props) => {
         >
           <Button onClick={handleDownload} className="gap-2 bg-primary text-primary-foreground hover:bg-primary/90">
             <Download className="h-4 w-4" /> Download PNG
+          </Button>
+          <Button
+            variant="outline"
+            className="gap-2 border-border text-foreground hover:bg-secondary"
+            onClick={handleSave}
+          >
+            <Bookmark className="h-4 w-4" /> Save
           </Button>
           <Button
             variant="outline"
