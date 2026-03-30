@@ -6,6 +6,7 @@ import GeneratePanel from "@/components/GeneratePanel";
 import PostCanvas from "@/components/PostCanvas";
 import { Template, SocialFormat, GeneratedPost } from "@/types/post";
 import { generatePost } from "@/lib/generate";
+import { useBrandKit } from "@/hooks/useBrandKit";
 import { toast } from "sonner";
 
 const Index = () => {
