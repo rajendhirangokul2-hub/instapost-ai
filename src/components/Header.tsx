@@ -1,5 +1,5 @@
 import { motion } from "framer-motion";
-import { Sparkles, LogIn, LogOut, BookmarkCheck } from "lucide-react";
+import { Sparkles, LogIn, LogOut, BookmarkCheck, Palette } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/hooks/useAuth";
 import { useNavigate } from "react-router-dom";
