@@ -44,7 +44,7 @@ const SavedPosts = () => {
     if (error) {
       toast.error("Failed to load saved posts");
     } else {
-      setPosts(data as SavedPost[]);
+      setPosts(data as unknown as SavedPost[]);
     }
     setLoading(false);
   };
