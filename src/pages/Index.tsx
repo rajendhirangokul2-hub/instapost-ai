@@ -15,6 +15,7 @@ const Index = () => {
   const [format, setFormat] = useState<SocialFormat>("instagram");
   const [generated, setGenerated] = useState<GeneratedPost | null>(null);
   const [isGenerating, setIsGenerating] = useState(false);
+  const { brandKit } = useBrandKit();
 
   const handleGenerate = async () => {
     if (!template) {
