@@ -78,7 +78,14 @@ const Index = () => {
           {/* Right Canvas */}
           <div className="flex items-start justify-center pt-4">
             <div className="w-full max-w-2xl">
-              <PostCanvas post={generated} format={format} isGenerating={isGenerating} />
+              <PostCanvas
+                post={generated}
+                format={format}
+                isGenerating={isGenerating}
+                templateId={template?.id}
+                templateName={template?.name}
+                keywords={keywords}
+              />
             </div>
           </div>
         </div>
