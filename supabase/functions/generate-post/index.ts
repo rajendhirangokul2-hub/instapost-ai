@@ -12,7 +12,7 @@ serve(async (req) => {
   }
 
   try {
-    const { category, keywords, templateName } = await req.json();
+    const { category, keywords, templateName, brandKit } = await req.json();
 
     if (!category || !templateName) {
       return new Response(
