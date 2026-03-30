@@ -14,6 +14,51 @@ export type Database = {
   }
   public: {
     Tables: {
+      brand_kits: {
+        Row: {
+          accent_color: string
+          background_color: string
+          created_at: string
+          font_style: string
+          id: string
+          logo_url: string | null
+          name: string
+          primary_color: string
+          secondary_color: string
+          text_color: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          accent_color?: string
+          background_color?: string
+          created_at?: string
+          font_style?: string
+          id?: string
+          logo_url?: string | null
+          name?: string
+          primary_color?: string
+          secondary_color?: string
+          text_color?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          accent_color?: string
+          background_color?: string
+          created_at?: string
+          font_style?: string
+          id?: string
+          logo_url?: string | null
+          name?: string
+          primary_color?: string
+          secondary_color?: string
+          text_color?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           avatar_url: string | null

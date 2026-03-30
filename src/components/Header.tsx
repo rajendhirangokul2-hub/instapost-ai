@@ -1,5 +1,5 @@
 import { motion } from "framer-motion";
-import { Sparkles, LogIn, LogOut, BookmarkCheck } from "lucide-react";
+import { Sparkles, LogIn, LogOut, BookmarkCheck, Palette } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/hooks/useAuth";
 import { useNavigate } from "react-router-dom";
@@ -33,6 +33,15 @@ const Header = () => {
         <div className="flex items-center gap-3">
           {user ? (
             <>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => navigate("/brand-kit")}
+                className="gap-2 text-muted-foreground hover:text-foreground"
+              >
+                <Palette className="h-4 w-4" />
+                <span className="hidden sm:inline">Brand Kit</span>
+              </Button>
               <Button
                 variant="ghost"
                 size="sm"

@@ -12,7 +12,7 @@ serve(async (req) => {
   }
 
   try {
-    const { category, keywords, templateName } = await req.json();
+    const { category, keywords, templateName, brandKit } = await req.json();
 
     if (!category || !templateName) {
       return new Response(
@@ -28,18 +28,23 @@ serve(async (req) => {
 
     const systemPrompt = `You are a professional social media copywriter and designer. Generate social media post content based on the given template category and keywords. You must respond using the generate_post tool.`;
 
+    const brandContext = brandKit
+      ? `\n\nIMPORTANT - Use the user's brand kit colors:\n- Primary: ${brandKit.primaryColor}\n- Secondary: ${brandKit.secondaryColor}\n- Accent: ${brandKit.accentColor}\n- Background: ${brandKit.backgroundColor}\n- Text: ${brandKit.textColor}\n- Preferred font style: ${brandKit.fontStyle}\n- Brand name: ${brandKit.name}\n\nUse these exact colors in the output. The bg should be the brand background, text should be the brand text color, accent should be the brand accent, and ctaBg should be the brand primary color. Use the brand's preferred font style.`
+      : "";
+
     const userPrompt = `Generate a social media post for:
 - Category: ${category}
 - Template style: ${templateName}
 - Keywords/Business: ${keywords || "general"}
+${brandContext}
 
 Create compelling, professional content with:
 1. A catchy headline (2-4 words per line, max 2 lines, use \\n for line break)
 2. Supporting description text (1-2 sentences, engaging and action-oriented)
 3. A clear call-to-action button text (short, compelling)
-4. A color palette that matches the ${category} theme
+4. A color palette that matches the ${category} theme${brandKit ? " — USE THE BRAND KIT COLORS PROVIDED" : ""}
 5. Layout choice: "centered", "left-aligned", or "split"
-6. Font style: "bold" (strong/impactful), "elegant" (refined/classy), or "playful" (fun/casual)
+6. Font style: ${brandKit ? `"${brandKit.fontStyle}" (user's brand preference)` : '"bold" (strong/impactful), "elegant" (refined/classy), or "playful" (fun/casual)'}
 
 Make the content unique, professional, and ready to post. Colors should be hex codes.`;
 

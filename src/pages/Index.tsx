@@ -6,6 +6,7 @@ import GeneratePanel from "@/components/GeneratePanel";
 import PostCanvas from "@/components/PostCanvas";
 import { Template, SocialFormat, GeneratedPost } from "@/types/post";
 import { generatePost } from "@/lib/generate";
+import { useBrandKit } from "@/hooks/useBrandKit";
 import { toast } from "sonner";
 
 const Index = () => {
@@ -14,6 +15,7 @@ const Index = () => {
   const [format, setFormat] = useState<SocialFormat>("instagram");
   const [generated, setGenerated] = useState<GeneratedPost | null>(null);
   const [isGenerating, setIsGenerating] = useState(false);
+  const { brandKit } = useBrandKit();
 
   const handleGenerate = async () => {
     if (!template) {
@@ -22,7 +24,7 @@ const Index = () => {
     }
     setIsGenerating(true);
     try {
-      const post = await generatePost(template, keywords);
+      const post = await generatePost(template, keywords, brandKit ?? undefined);
       setGenerated(post);
       toast.success("Post generated successfully!");
     } catch {
