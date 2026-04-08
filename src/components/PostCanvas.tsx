@@ -2,11 +2,13 @@ import { motion, AnimatePresence } from "framer-motion";
 import { Download, Share2, Loader2, Bookmark } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { GeneratedPost, SocialFormat } from "@/types/post";
-import { useRef } from "react";
+import { useRef, useState, useEffect } from "react";
 import { toPng } from "html-to-image";
 import { toast } from "sonner";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
+import InlineEdit from "@/components/InlineEdit";
+import ColorPicker from "@/components/ColorPicker";
 
 interface Props {
   post: GeneratedPost | null;
@@ -26,6 +28,16 @@ const aspectRatios: Record<SocialFormat, string> = {
 const PostCanvas = ({ post, format, isGenerating, templateId, templateName, keywords }: Props) => {
   const canvasRef = useRef<HTMLDivElement>(null);
   const { user } = useAuth();
+  const [editPost, setEditPost] = useState<GeneratedPost | null>(null);
+
+  useEffect(() => { setEditPost(post); }, [post]);
+
+  const current = editPost;
+
+  const update = (field: keyof GeneratedPost, value: any) => {
+    if (!editPost) return;
+    setEditPost({ ...editPost, [field]: value });
+  };
 
   const handleDownload = async () => {
     if (!canvasRef.current) return;
@@ -42,11 +54,8 @@ const PostCanvas = ({ post, format, isGenerating, templateId, templateName, keyw
   };
 
   const handleSave = async () => {
-    if (!user) {
-      toast.error("Sign in to save posts");
-      return;
-    }
-    if (!post || !templateId) return;
+    if (!user) { toast.error("Sign in to save posts"); return; }
+    if (!current || !templateId) return;
 
     const { error } = await supabase.from("saved_posts").insert({
       user_id: user.id,
@@ -54,19 +63,16 @@ const PostCanvas = ({ post, format, isGenerating, templateId, templateName, keyw
       template_name: templateName || "Unknown",
       format,
       keywords: keywords || "",
-      headline: post.headline,
-      subtext: post.subtext,
-      cta: post.cta,
-      colors: post.colors as any,
-      layout: post.layout,
-      font_style: post.fontStyle,
+      headline: current.headline,
+      subtext: current.subtext,
+      cta: current.cta,
+      colors: current.colors as any,
+      layout: current.layout,
+      font_style: current.fontStyle,
     });
 
-    if (error) {
-      toast.error("Failed to save post");
-    } else {
-      toast.success("Post saved!");
-    }
+    if (error) toast.error("Failed to save post");
+    else toast.success("Post saved!");
   };
 
   return (
@@ -84,7 +90,7 @@ const PostCanvas = ({ post, format, isGenerating, templateId, templateName, keyw
               <Loader2 className="h-10 w-10 animate-spin text-primary" />
               <p className="font-display text-sm font-medium text-muted-foreground">AI is crafting your post...</p>
             </motion.div>
-          ) : post ? (
+          ) : current ? (
             <motion.div
               key="post"
               initial={{ opacity: 0, scale: 0.95 }}
@@ -93,57 +99,59 @@ const PostCanvas = ({ post, format, isGenerating, templateId, templateName, keyw
               transition={{ type: "spring", duration: 0.6 }}
               ref={canvasRef}
               className="absolute inset-0 flex flex-col items-center justify-center p-8 sm:p-12 rounded-xl"
-              style={{ backgroundColor: post.colors.bg }}
+              style={{ backgroundColor: current.colors.bg }}
             >
               <div
                 className="absolute top-0 left-0 h-1.5 w-full"
-                style={{ backgroundColor: post.colors.accent }}
+                style={{ backgroundColor: current.colors.accent }}
               />
               <div
                 className={`flex flex-1 flex-col gap-5 w-full ${
-                  post.layout === "centered"
+                  current.layout === "centered"
                     ? "items-center justify-center text-center"
-                    : post.layout === "left-aligned"
+                    : current.layout === "left-aligned"
                     ? "items-start justify-center text-left"
                     : "items-start justify-end text-left"
                 }`}
               >
-                <h2
+                <InlineEdit
+                  value={current.headline}
+                  onChange={(v) => update("headline", v)}
+                  multiline
                   className={`whitespace-pre-line leading-tight ${
-                    post.fontStyle === "bold"
+                    current.fontStyle === "bold"
                       ? "font-bold text-2xl sm:text-4xl"
-                      : post.fontStyle === "elegant"
+                      : current.fontStyle === "elegant"
                       ? "font-light text-2xl sm:text-4xl tracking-tight"
                       : "font-semibold text-xl sm:text-3xl"
                   }`}
                   style={{
-                    color: post.colors.text,
-                    fontFamily: post.fontStyle === "elegant" ? "'Space Grotesk'" : "inherit",
+                    color: current.colors.text,
+                    fontFamily: current.fontStyle === "elegant" ? "'Space Grotesk'" : "inherit",
                   }}
-                >
-                  {post.headline}
-                </h2>
-                <p
+                />
+                <InlineEdit
+                  value={current.subtext}
+                  onChange={(v) => update("subtext", v)}
+                  multiline
                   className="max-w-md text-sm sm:text-base leading-relaxed opacity-85"
-                  style={{ color: post.colors.text }}
-                >
-                  {post.subtext}
-                </p>
-                <button
-                  className="mt-2 rounded-lg px-6 py-2.5 text-sm font-bold uppercase tracking-wide transition-transform hover:scale-105"
+                  style={{ color: current.colors.text }}
+                />
+                <InlineEdit
+                  value={current.cta}
+                  onChange={(v) => update("cta", v)}
+                  className="mt-2 rounded-lg px-6 py-2.5 text-sm font-bold uppercase tracking-wide"
                   style={{
-                    backgroundColor: post.colors.ctaBg,
-                    color: post.colors.bg === "#FFFFFF" || post.colors.bg === "#FAFAF9" || post.colors.bg === "#FEF3C7" || post.colors.bg === "#FFF1F2" || post.colors.bg === "#ECFDF5" || post.colors.bg === "#F0F9FF"
+                    backgroundColor: current.colors.ctaBg,
+                    color: current.colors.bg === "#FFFFFF" || current.colors.bg === "#FAFAF9" || current.colors.bg === "#FEF3C7" || current.colors.bg === "#FFF1F2" || current.colors.bg === "#ECFDF5" || current.colors.bg === "#F0F9FF"
                       ? "#FFFFFF"
-                      : post.colors.text,
+                      : current.colors.text,
                   }}
-                >
-                  {post.cta}
-                </button>
+                />
               </div>
               <div
                 className="absolute bottom-3 right-4 text-xs font-medium opacity-30"
-                style={{ color: post.colors.text }}
+                style={{ color: current.colors.text }}
               >
                 PostAI
               </div>
@@ -164,15 +172,19 @@ const PostCanvas = ({ post, format, isGenerating, templateId, templateName, keyw
         </AnimatePresence>
       </div>
 
-      {post && !isGenerating && (
+      {current && !isGenerating && (
         <motion.div
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
-          className="flex gap-3"
+          className="flex flex-wrap gap-3 justify-center"
         >
           <Button onClick={handleDownload} className="gap-2 bg-primary text-primary-foreground hover:bg-primary/90">
             <Download className="h-4 w-4" /> Download PNG
           </Button>
+          <ColorPicker
+            colors={current.colors}
+            onChange={(c) => update("colors", c)}
+          />
           <Button
             variant="outline"
             className="gap-2 border-border text-foreground hover:bg-secondary"
