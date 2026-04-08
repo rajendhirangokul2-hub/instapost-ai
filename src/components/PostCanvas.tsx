@@ -1,14 +1,16 @@
 import { motion, AnimatePresence } from "framer-motion";
-import { Download, Share2, Loader2, Bookmark } from "lucide-react";
+import { Download, Share2, Loader2, Bookmark, Undo2, Redo2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { GeneratedPost, SocialFormat } from "@/types/post";
-import { useRef, useState, useEffect } from "react";
+import { useRef, useEffect } from "react";
 import { toPng } from "html-to-image";
 import { toast } from "sonner";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import InlineEdit from "@/components/InlineEdit";
 import ColorPicker from "@/components/ColorPicker";
+import FontPicker, { FontStyle } from "@/components/FontPicker";
+import { useHistory } from "@/hooks/useHistory";
 
 interface Props {
   post: GeneratedPost | null;
@@ -25,18 +27,30 @@ const aspectRatios: Record<SocialFormat, string> = {
   twitter: "aspect-[1200/675]",
 };
 
+const fontFamilyMap: Record<string, string | undefined> = {
+  elegant: "'Space Grotesk'",
+  serif: "Georgia, serif",
+  mono: "monospace",
+};
+
+const fontClassMap: Record<string, string> = {
+  bold: "font-bold text-2xl sm:text-4xl",
+  elegant: "font-light text-2xl sm:text-4xl tracking-tight",
+  playful: "font-semibold text-xl sm:text-3xl",
+  mono: "font-mono font-medium text-xl sm:text-3xl",
+  serif: "font-semibold text-2xl sm:text-4xl",
+};
+
 const PostCanvas = ({ post, format, isGenerating, templateId, templateName, keywords }: Props) => {
   const canvasRef = useRef<HTMLDivElement>(null);
   const { user } = useAuth();
-  const [editPost, setEditPost] = useState<GeneratedPost | null>(null);
+  const { state: current, set, reset, undo, redo, canUndo, canRedo } = useHistory<GeneratedPost>(null);
 
-  useEffect(() => { setEditPost(post); }, [post]);
-
-  const current = editPost;
+  useEffect(() => { reset(post); }, [post, reset]);
 
   const update = (field: keyof GeneratedPost, value: any) => {
-    if (!editPost) return;
-    setEditPost({ ...editPost, [field]: value });
+    if (!current) return;
+    set({ ...current, [field]: value });
   };
 
   const handleDownload = async () => {
@@ -118,16 +132,10 @@ const PostCanvas = ({ post, format, isGenerating, templateId, templateName, keyw
                   value={current.headline}
                   onChange={(v) => update("headline", v)}
                   multiline
-                  className={`whitespace-pre-line leading-tight ${
-                    current.fontStyle === "bold"
-                      ? "font-bold text-2xl sm:text-4xl"
-                      : current.fontStyle === "elegant"
-                      ? "font-light text-2xl sm:text-4xl tracking-tight"
-                      : "font-semibold text-xl sm:text-3xl"
-                  }`}
+                  className={`whitespace-pre-line leading-tight ${fontClassMap[current.fontStyle] || fontClassMap.bold}`}
                   style={{
                     color: current.colors.text,
-                    fontFamily: current.fontStyle === "elegant" ? "'Space Grotesk'" : "inherit",
+                    fontFamily: fontFamilyMap[current.fontStyle] || "inherit",
                   }}
                 />
                 <InlineEdit
@@ -176,17 +184,34 @@ const PostCanvas = ({ post, format, isGenerating, templateId, templateName, keyw
         <motion.div
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
-          className="flex flex-wrap gap-3 justify-center"
+          className="flex flex-wrap gap-2 justify-center"
         >
-          <Button onClick={handleDownload} className="gap-2 bg-primary text-primary-foreground hover:bg-primary/90">
-            <Download className="h-4 w-4" /> Download PNG
-          </Button>
-          <ColorPicker
-            colors={current.colors}
-            onChange={(c) => update("colors", c)}
-          />
           <Button
             variant="outline"
+            size="sm"
+            onClick={undo}
+            disabled={!canUndo}
+            className="gap-1 border-border text-foreground hover:bg-secondary disabled:opacity-30"
+          >
+            <Undo2 className="h-4 w-4" />
+          </Button>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={redo}
+            disabled={!canRedo}
+            className="gap-1 border-border text-foreground hover:bg-secondary disabled:opacity-30"
+          >
+            <Redo2 className="h-4 w-4" />
+          </Button>
+          <ColorPicker colors={current.colors} onChange={(c) => update("colors", c)} />
+          <FontPicker value={current.fontStyle} onChange={(v) => update("fontStyle", v as FontStyle)} />
+          <Button onClick={handleDownload} size="sm" className="gap-2 bg-primary text-primary-foreground hover:bg-primary/90">
+            <Download className="h-4 w-4" /> Download
+          </Button>
+          <Button
+            variant="outline"
+            size="sm"
             className="gap-2 border-border text-foreground hover:bg-secondary"
             onClick={handleSave}
           >
@@ -194,6 +219,7 @@ const PostCanvas = ({ post, format, isGenerating, templateId, templateName, keyw
           </Button>
           <Button
             variant="outline"
+            size="sm"
             className="gap-2 border-border text-foreground hover:bg-secondary"
             onClick={() => toast.info("Sharing coming soon!")}
           >

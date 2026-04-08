@@ -20,7 +20,7 @@ export interface GeneratedPost {
     ctaBg: string;
   };
   layout: "centered" | "left-aligned" | "split";
-  fontStyle: "bold" | "elegant" | "playful";
+  fontStyle: "bold" | "elegant" | "playful" | "mono" | "serif";
 }
 
 export interface PostState {
