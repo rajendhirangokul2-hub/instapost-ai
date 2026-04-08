@@ -97,7 +97,7 @@ Make the content unique, professional, and ready to post. Colors should be hex c
                   },
                   fontStyle: {
                     type: "string",
-                    enum: ["bold", "elegant", "playful"],
+                    enum: ["bold", "elegant", "playful", "mono", "serif"],
                   },
                 },
                 required: ["headline", "subtext", "cta", "colors", "layout", "fontStyle"],
