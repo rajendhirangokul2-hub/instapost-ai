@@ -71,6 +71,27 @@ export const templates: Template[] = [
     preview: "💪",
     description: "Motivational fitness and health posts",
   },
+  {
+    id: "offer-discount",
+    name: "Special Offer",
+    category: "offer",
+    preview: "🎯",
+    description: "Compelling discount and deal posts",
+  },
+  {
+    id: "opening-grand",
+    name: "Grand Opening",
+    category: "opening",
+    preview: "🎊",
+    description: "Celebrate new store or branch launches",
+  },
+  {
+    id: "festival-celebration",
+    name: "Festival",
+    category: "festival",
+    preview: "🎉",
+    description: "Festive greetings and seasonal celebrations",
+  },
 ];
 
 export const categoryLabels: Record<string, string> = {
@@ -80,6 +101,9 @@ export const categoryLabels: Record<string, string> = {
   education: "Education",
   food: "Food & Dining",
   fitness: "Fitness & Health",
+  offer: "Offers",
+  opening: "Opening",
+  festival: "Festival",
 };
 
 export const categoryIcons: Record<string, string> = {
@@ -89,4 +113,7 @@ export const categoryIcons: Record<string, string> = {
   education: "📖",
   food: "🍕",
   fitness: "🏋️",
+  offer: "🎯",
+  opening: "🎊",
+  festival: "🎉",
 };

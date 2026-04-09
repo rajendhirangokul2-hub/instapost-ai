@@ -3,6 +3,10 @@ import { Sparkles, RefreshCw } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { SocialFormat, Template } from "@/types/post";
+import { Shop } from "@/hooks/useShops";
+import ShopSwitcher from "@/components/ShopSwitcher";
+import ThemePicker from "@/components/ThemePicker";
+import { PostTheme } from "@/lib/themes";
 
 interface Props {
   template: Template | null;
@@ -13,6 +17,11 @@ interface Props {
   onGenerate: () => void;
   isGenerating: boolean;
   hasGenerated: boolean;
+  shops: Shop[];
+  activeShop: Shop | null;
+  onShopSelect: (shop: Shop) => void;
+  selectedTheme: string | null;
+  onThemeSelect: (theme: PostTheme) => void;
 }
 
 const formats: { value: SocialFormat; label: string; size: string }[] = [
@@ -22,28 +31,40 @@ const formats: { value: SocialFormat; label: string; size: string }[] = [
 ];
 
 const GeneratePanel = ({
-  template,
-  keywords,
-  onKeywordsChange,
-  format,
-  onFormatChange,
-  onGenerate,
-  isGenerating,
-  hasGenerated,
+  template, keywords, onKeywordsChange, format, onFormatChange,
+  onGenerate, isGenerating, hasGenerated,
+  shops, activeShop, onShopSelect,
+  selectedTheme, onThemeSelect,
 }: Props) => (
   <div className="space-y-5">
     <h2 className="font-display text-lg font-semibold text-foreground">Configure</h2>
 
+    {/* Shop Switcher */}
+    {shops.length > 0 && (
+      <div className="space-y-2">
+        <label className="text-sm font-medium text-muted-foreground">Business Profile</label>
+        <ShopSwitcher shops={shops} activeShop={activeShop} onSelect={onShopSelect} />
+        {activeShop && (
+          <p className="text-xs text-muted-foreground">
+            📍 {activeShop.address || "No address"} · 📞 {activeShop.phone || "No phone"}
+          </p>
+        )}
+      </div>
+    )}
+
     {/* Keywords */}
     <div className="space-y-2">
-      <label className="text-sm font-medium text-muted-foreground">Keywords / Business Type</label>
+      <label className="text-sm font-medium text-muted-foreground">Keywords / Offer Details</label>
       <Input
-        placeholder="e.g. Coffee Shop, Tech Startup..."
+        placeholder="e.g. 50% off summer sale, New menu..."
         value={keywords}
         onChange={(e) => onKeywordsChange(e.target.value)}
         className="bg-secondary border-border"
       />
     </div>
+
+    {/* Theme */}
+    <ThemePicker selected={selectedTheme} onSelect={onThemeSelect} />
 
     {/* Format */}
     <div className="space-y-2">
@@ -74,28 +95,17 @@ const GeneratePanel = ({
         className="w-full gap-2 bg-primary py-6 text-base font-semibold text-primary-foreground hover:bg-primary/90 glow-primary"
       >
         {isGenerating ? (
-          <>
-            <RefreshCw className="h-5 w-5 animate-spin" />
-            Generating...
-          </>
+          <><RefreshCw className="h-5 w-5 animate-spin" /> Generating...</>
         ) : hasGenerated ? (
-          <>
-            <RefreshCw className="h-5 w-5" />
-            Regenerate Post
-          </>
+          <><RefreshCw className="h-5 w-5" /> Regenerate Post</>
         ) : (
-          <>
-            <Sparkles className="h-5 w-5" />
-            Generate Post
-          </>
+          <><Sparkles className="h-5 w-5" /> Generate Post</>
         )}
       </Button>
     </motion.div>
 
     {!template && (
-      <p className="text-center text-sm text-muted-foreground">
-        Select a template to get started
-      </p>
+      <p className="text-center text-sm text-muted-foreground">Select a template to get started</p>
     )}
   </div>
 );

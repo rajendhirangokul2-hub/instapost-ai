@@ -137,6 +137,63 @@ export type Database = {
         }
         Relationships: []
       }
+      shops: {
+        Row: {
+          accent_color: string
+          address: string
+          background_color: string
+          category: string
+          created_at: string
+          font_style: string
+          id: string
+          is_default: boolean
+          logo_url: string | null
+          name: string
+          phone: string
+          primary_color: string
+          secondary_color: string
+          text_color: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          accent_color?: string
+          address?: string
+          background_color?: string
+          category?: string
+          created_at?: string
+          font_style?: string
+          id?: string
+          is_default?: boolean
+          logo_url?: string | null
+          name?: string
+          phone?: string
+          primary_color?: string
+          secondary_color?: string
+          text_color?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          accent_color?: string
+          address?: string
+          background_color?: string
+          category?: string
+          created_at?: string
+          font_style?: string
+          id?: string
+          is_default?: boolean
+          logo_url?: string | null
+          name?: string
+          phone?: string
+          primary_color?: string
+          secondary_color?: string
+          text_color?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never

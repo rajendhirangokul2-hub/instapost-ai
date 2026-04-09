@@ -1,4 +1,4 @@
-export type TemplateCategory = "business" | "sale" | "event" | "education" | "food" | "fitness";
+export type TemplateCategory = "business" | "sale" | "event" | "education" | "food" | "fitness" | "offer" | "opening" | "festival";
 export type SocialFormat = "instagram" | "linkedin" | "twitter";
 
 export interface Template {
