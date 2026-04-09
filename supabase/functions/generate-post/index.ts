@@ -12,7 +12,7 @@ serve(async (req) => {
   }
 
   try {
-    const { category, keywords, templateName, brandKit } = await req.json();
+    const { category, keywords, templateName, shop, theme, brandKit } = await req.json();
 
     if (!category || !templateName) {
       return new Response(
@@ -26,25 +26,41 @@ serve(async (req) => {
       throw new Error("LOVABLE_API_KEY is not configured");
     }
 
-    const systemPrompt = `You are a professional social media copywriter and designer. Generate social media post content based on the given template category and keywords. You must respond using the generate_post tool.`;
+    const systemPrompt = `You are a professional social media copywriter and designer. Generate social media post content based on the given template category, business details, and keywords. You must respond using the generate_post tool.`;
 
-    const brandContext = brandKit
-      ? `\n\nIMPORTANT - Use the user's brand kit colors:\n- Primary: ${brandKit.primaryColor}\n- Secondary: ${brandKit.secondaryColor}\n- Accent: ${brandKit.accentColor}\n- Background: ${brandKit.backgroundColor}\n- Text: ${brandKit.textColor}\n- Preferred font style: ${brandKit.fontStyle}\n- Brand name: ${brandKit.name}\n\nUse these exact colors in the output. The bg should be the brand background, text should be the brand text color, accent should be the brand accent, and ctaBg should be the brand primary color. Use the brand's preferred font style.`
-      : "";
+    // Build context from shop details (smart placeholders)
+    let shopContext = "";
+    if (shop) {
+      shopContext = `\n\nBUSINESS DETAILS (MUST incorporate into the post):\n- Business Name: ${shop.name}\n- Category: ${shop.category}\n- Address: ${shop.address || "N/A"}\n- Phone: ${shop.phone || "N/A"}\n\nIMPORTANT: Include the business name prominently in the headline or subtext. If address and phone are provided, include them in the subtext naturally.\n\nBRAND COLORS:\n- Primary: ${shop.primaryColor}\n- Secondary: ${shop.secondaryColor}\n- Accent: ${shop.accentColor}\n- Background: ${shop.backgroundColor}\n- Text: ${shop.textColor}\n- Font Style: ${shop.fontStyle}\n\nUse these exact brand colors. bg = background color, text = text color, accent = accent color, ctaBg = primary color.`;
+    }
+
+    // Legacy brand kit support
+    let brandContext = "";
+    if (!shop && brandKit) {
+      brandContext = `\n\nBRAND KIT COLORS:\n- Primary: ${brandKit.primaryColor}\n- Secondary: ${brandKit.secondaryColor}\n- Accent: ${brandKit.accentColor}\n- Background: ${brandKit.backgroundColor}\n- Text: ${brandKit.textColor}\n- Font Style: ${brandKit.fontStyle}\n- Brand Name: ${brandKit.name}\n\nUse these exact colors.`;
+    }
+
+    // Theme context
+    let themeContext = "";
+    if (theme) {
+      themeContext = `\n\nTHEME: "${theme.name}"\n- Suggested colors: bg=${theme.colors.bg}, text=${theme.colors.text}, accent=${theme.colors.accent}, ctaBg=${theme.colors.ctaBg}\n- Suggested font: ${theme.fontStyle}\n- Suggested layout: ${theme.layout}\n${shop ? "Blend the theme style with the brand colors — brand colors take priority but use the theme's aesthetic." : "Use these theme colors and style."}`;
+    }
 
     const userPrompt = `Generate a social media post for:
 - Category: ${category}
 - Template style: ${templateName}
-- Keywords/Business: ${keywords || "general"}
-${brandContext}
+- Keywords/Details: ${keywords || "general"}
+${shopContext}${brandContext}${themeContext}
 
 Create compelling, professional content with:
-1. A catchy headline (2-4 words per line, max 2 lines, use \\n for line break)
-2. Supporting description text (1-2 sentences, engaging and action-oriented)
+1. A catchy headline (2-4 words per line, max 2 lines, use actual newline characters for line breaks)
+2. Supporting description text (1-2 sentences, engaging and action-oriented)${shop?.address || shop?.phone ? " Include business contact info naturally." : ""}
 3. A clear call-to-action button text (short, compelling)
-4. A color palette that matches the ${category} theme${brandKit ? " — USE THE BRAND KIT COLORS PROVIDED" : ""}
+4. A color palette${shop ? " using the brand colors" : theme ? " using the theme colors" : ` matching the ${category} theme`}
 5. Layout choice: "centered", "left-aligned", or "split"
-6. Font style: ${brandKit ? `"${brandKit.fontStyle}" (user's brand preference)` : '"bold" (strong/impactful), "elegant" (refined/classy), or "playful" (fun/casual)'}
+6. Font style: ${shop ? `"${shop.fontStyle}" (brand preference)` : theme ? `"${theme.fontStyle}" (theme preference)` : '"bold", "elegant", "playful", "mono", or "serif"'}
+
+IMPORTANT: For the headline, use actual newline characters (not the literal text "\\n") if you want line breaks.
 
 Make the content unique, professional, and ready to post. Colors should be hex codes.`;
 
@@ -69,18 +85,9 @@ Make the content unique, professional, and ready to post. Colors should be hex c
               parameters: {
                 type: "object",
                 properties: {
-                  headline: {
-                    type: "string",
-                    description: "Catchy headline, use \\n for line breaks",
-                  },
-                  subtext: {
-                    type: "string",
-                    description: "Supporting description, 1-2 sentences",
-                  },
-                  cta: {
-                    type: "string",
-                    description: "Call-to-action button text",
-                  },
+                  headline: { type: "string", description: "Catchy headline. Use actual newline characters for line breaks, not literal backslash-n." },
+                  subtext: { type: "string", description: "Supporting description, 1-2 sentences. Include business address/phone if provided." },
+                  cta: { type: "string", description: "Call-to-action button text" },
                   colors: {
                     type: "object",
                     properties: {
@@ -91,14 +98,8 @@ Make the content unique, professional, and ready to post. Colors should be hex c
                     },
                     required: ["bg", "text", "accent", "ctaBg"],
                   },
-                  layout: {
-                    type: "string",
-                    enum: ["centered", "left-aligned", "split"],
-                  },
-                  fontStyle: {
-                    type: "string",
-                    enum: ["bold", "elegant", "playful", "mono", "serif"],
-                  },
+                  layout: { type: "string", enum: ["centered", "left-aligned", "split"] },
+                  fontStyle: { type: "string", enum: ["bold", "elegant", "playful", "mono", "serif"] },
                 },
                 required: ["headline", "subtext", "cta", "colors", "layout", "fontStyle"],
                 additionalProperties: false,
@@ -136,6 +137,11 @@ Make the content unique, professional, and ready to post. Colors should be hex c
     }
 
     const post = JSON.parse(toolCall.function.arguments);
+
+    // Fix literal \n in headline
+    if (post.headline) {
+      post.headline = post.headline.replace(/\\n/g, "\n");
+    }
 
     return new Response(JSON.stringify(post), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
