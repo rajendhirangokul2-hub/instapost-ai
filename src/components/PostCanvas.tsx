@@ -55,15 +55,33 @@ const PostCanvas = ({ post, format, isGenerating, templateId, templateName, keyw
     set({ ...current, [field]: value });
   };
 
-  const handleDownload = async () => {
+  const downloadFile = (dataUrl: string, ext: string) => {
+    const link = document.createElement("a");
+    link.download = `postai-${format}-${Date.now()}.${ext}`;
+    link.href = dataUrl;
+    link.click();
+  };
+
+  const handleDownload = async (type: "png" | "jpg" | "svg" | "pdf" = "png") => {
     if (!canvasRef.current) return;
     try {
-      const dataUrl = await toPng(canvasRef.current, { pixelRatio: 2 });
-      const link = document.createElement("a");
-      link.download = `postai-${format}-${Date.now()}.png`;
-      link.href = dataUrl;
-      link.click();
-      toast.success("Post downloaded successfully!");
+      const opts = { pixelRatio: 2 };
+      if (type === "png") {
+        downloadFile(await toPng(canvasRef.current, opts), "png");
+      } else if (type === "jpg") {
+        downloadFile(await toJpeg(canvasRef.current, { ...opts, quality: 0.95 }), "jpg");
+      } else if (type === "svg") {
+        downloadFile(await toSvg(canvasRef.current, opts), "svg");
+      } else if (type === "pdf") {
+        const imgData = await toPng(canvasRef.current, opts);
+        const el = canvasRef.current;
+        const w = el.offsetWidth;
+        const h = el.offsetHeight;
+        const pdf = new jsPDF({ orientation: w > h ? "landscape" : "portrait", unit: "px", format: [w, h] });
+        pdf.addImage(imgData, "PNG", 0, 0, w, h);
+        pdf.save(`postai-${format}-${Date.now()}.pdf`);
+      }
+      toast.success(`Post downloaded as ${type.toUpperCase()}!`);
     } catch {
       toast.error("Failed to download. Try again.");
     }
