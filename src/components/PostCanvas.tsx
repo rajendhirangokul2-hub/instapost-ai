@@ -226,9 +226,19 @@ const PostCanvas = ({ post, format, isGenerating, templateId, templateName, keyw
           </Button>
           <ColorPicker colors={current.colors} onChange={(c) => update("colors", c)} />
           <FontPicker value={current.fontStyle} onChange={(v) => update("fontStyle", v as FontStyle)} />
-          <Button onClick={handleDownload} size="sm" className="gap-2 bg-primary text-primary-foreground hover:bg-primary/90">
-            <Download className="h-4 w-4" /> Download
-          </Button>
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button size="sm" className="gap-2 bg-primary text-primary-foreground hover:bg-primary/90">
+                <Download className="h-4 w-4" /> Download <ChevronDown className="h-3 w-3" />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end">
+              <DropdownMenuItem onClick={() => handleDownload("png")}>PNG</DropdownMenuItem>
+              <DropdownMenuItem onClick={() => handleDownload("jpg")}>JPG</DropdownMenuItem>
+              <DropdownMenuItem onClick={() => handleDownload("svg")}>SVG</DropdownMenuItem>
+              <DropdownMenuItem onClick={() => handleDownload("pdf")}>PDF</DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
           <Button
             variant="outline"
             size="sm"
