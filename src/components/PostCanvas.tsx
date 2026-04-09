@@ -1,10 +1,12 @@
 import { motion, AnimatePresence } from "framer-motion";
-import { Download, Share2, Loader2, Bookmark, Undo2, Redo2 } from "lucide-react";
+import { Download, Share2, Loader2, Bookmark, Undo2, Redo2, ChevronDown } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { GeneratedPost, SocialFormat } from "@/types/post";
 import { useRef, useEffect } from "react";
-import { toPng } from "html-to-image";
+import { toPng, toJpeg, toSvg } from "html-to-image";
+import { jsPDF } from "jspdf";
 import { toast } from "sonner";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import InlineEdit from "@/components/InlineEdit";
@@ -53,15 +55,33 @@ const PostCanvas = ({ post, format, isGenerating, templateId, templateName, keyw
     set({ ...current, [field]: value });
   };
 
-  const handleDownload = async () => {
+  const downloadFile = (dataUrl: string, ext: string) => {
+    const link = document.createElement("a");
+    link.download = `postai-${format}-${Date.now()}.${ext}`;
+    link.href = dataUrl;
+    link.click();
+  };
+
+  const handleDownload = async (type: "png" | "jpg" | "svg" | "pdf" = "png") => {
     if (!canvasRef.current) return;
     try {
-      const dataUrl = await toPng(canvasRef.current, { pixelRatio: 2 });
-      const link = document.createElement("a");
-      link.download = `postai-${format}-${Date.now()}.png`;
-      link.href = dataUrl;
-      link.click();
-      toast.success("Post downloaded successfully!");
+      const opts = { pixelRatio: 2 };
+      if (type === "png") {
+        downloadFile(await toPng(canvasRef.current, opts), "png");
+      } else if (type === "jpg") {
+        downloadFile(await toJpeg(canvasRef.current, { ...opts, quality: 0.95 }), "jpg");
+      } else if (type === "svg") {
+        downloadFile(await toSvg(canvasRef.current, opts), "svg");
+      } else if (type === "pdf") {
+        const imgData = await toPng(canvasRef.current, opts);
+        const el = canvasRef.current;
+        const w = el.offsetWidth;
+        const h = el.offsetHeight;
+        const pdf = new jsPDF({ orientation: w > h ? "landscape" : "portrait", unit: "px", format: [w, h] });
+        pdf.addImage(imgData, "PNG", 0, 0, w, h);
+        pdf.save(`postai-${format}-${Date.now()}.pdf`);
+      }
+      toast.success(`Post downloaded as ${type.toUpperCase()}!`);
     } catch {
       toast.error("Failed to download. Try again.");
     }
@@ -206,9 +226,19 @@ const PostCanvas = ({ post, format, isGenerating, templateId, templateName, keyw
           </Button>
           <ColorPicker colors={current.colors} onChange={(c) => update("colors", c)} />
           <FontPicker value={current.fontStyle} onChange={(v) => update("fontStyle", v as FontStyle)} />
-          <Button onClick={handleDownload} size="sm" className="gap-2 bg-primary text-primary-foreground hover:bg-primary/90">
-            <Download className="h-4 w-4" /> Download
-          </Button>
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button size="sm" className="gap-2 bg-primary text-primary-foreground hover:bg-primary/90">
+                <Download className="h-4 w-4" /> Download <ChevronDown className="h-3 w-3" />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end">
+              <DropdownMenuItem onClick={() => handleDownload("png")}>PNG</DropdownMenuItem>
+              <DropdownMenuItem onClick={() => handleDownload("jpg")}>JPG</DropdownMenuItem>
+              <DropdownMenuItem onClick={() => handleDownload("svg")}>SVG</DropdownMenuItem>
+              <DropdownMenuItem onClick={() => handleDownload("pdf")}>PDF</DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
           <Button
             variant="outline"
             size="sm"
