@@ -1,10 +1,12 @@
 import { motion, AnimatePresence } from "framer-motion";
-import { Download, Share2, Loader2, Bookmark, Undo2, Redo2 } from "lucide-react";
+import { Download, Share2, Loader2, Bookmark, Undo2, Redo2, ChevronDown } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { GeneratedPost, SocialFormat } from "@/types/post";
 import { useRef, useEffect } from "react";
-import { toPng } from "html-to-image";
+import { toPng, toJpeg, toSvg } from "html-to-image";
+import { jsPDF } from "jspdf";
 import { toast } from "sonner";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import InlineEdit from "@/components/InlineEdit";
