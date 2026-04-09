@@ -1,5 +1,5 @@
 import { motion } from "framer-motion";
-import { Sparkles, LogIn, LogOut, BookmarkCheck, Palette } from "lucide-react";
+import { Sparkles, LogIn, LogOut, BookmarkCheck, Store } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/hooks/useAuth";
 import { useNavigate } from "react-router-dom";
@@ -36,11 +36,11 @@ const Header = () => {
               <Button
                 variant="ghost"
                 size="sm"
-                onClick={() => navigate("/brand-kit")}
+                onClick={() => navigate("/shops")}
                 className="gap-2 text-muted-foreground hover:text-foreground"
               >
-                <Palette className="h-4 w-4" />
-                <span className="hidden sm:inline">Brand Kit</span>
+                <Store className="h-4 w-4" />
+                <span className="hidden sm:inline">My Shops</span>
               </Button>
               <Button
                 variant="ghost"
