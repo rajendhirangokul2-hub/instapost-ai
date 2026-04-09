@@ -8,7 +8,7 @@ interface Props {
   onSelect: (t: Template) => void;
 }
 
-const categories: Array<TemplateCategory | "all"> = ["all", "business", "sale", "event", "education", "food", "fitness"];
+const categories: Array<TemplateCategory | "all"> = ["all", "business", "sale", "offer", "event", "opening", "festival", "education", "food", "fitness"];
 
 const TemplateGallery = ({ selected, onSelect }: Props) => {
   const [filter, setFilter] = useState<TemplateCategory | "all">("all");
