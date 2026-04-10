@@ -17,13 +17,15 @@ const Index = () => {
   const [generated, setGenerated] = useState<GeneratedPost | null>(null);
   const [isGenerating, setIsGenerating] = useState(false);
   const [selectedTheme, setSelectedTheme] = useState<PostTheme | null>(null);
+  const [language, setLanguage] = useState("english");
+  const [showQr, setShowQr] = useState(false);
   const { shops, activeShop, selectShop } = useShops();
 
   const handleGenerate = async () => {
     if (!template) { toast.error("Please select a template first"); return; }
     setIsGenerating(true);
     try {
-      const post = await generatePost(template, keywords, activeShop ?? undefined, selectedTheme ?? undefined);
+      const post = await generatePost(template, keywords, activeShop ?? undefined, selectedTheme ?? undefined, language);
       setGenerated(post);
       toast.success("Post generated successfully!");
     } catch {
@@ -66,12 +68,16 @@ const Index = () => {
                 onShopSelect={selectShop}
                 selectedTheme={selectedTheme?.id ?? null}
                 onThemeSelect={setSelectedTheme}
+                language={language}
+                onLanguageChange={setLanguage}
+                showQr={showQr}
+                onShowQrChange={setShowQr}
               />
             </div>
           </div>
           <div className="flex items-start justify-center pt-4">
             <div className="w-full max-w-2xl">
-              <PostCanvas post={generated} format={format} isGenerating={isGenerating} templateId={template?.id} templateName={template?.name} keywords={keywords} />
+              <PostCanvas post={generated} format={format} isGenerating={isGenerating} templateId={template?.id} templateName={template?.name} keywords={keywords} showQr={showQr} qrValue={activeShop?.phone || activeShop?.address || "https://postai.app"} />
             </div>
           </div>
         </div>

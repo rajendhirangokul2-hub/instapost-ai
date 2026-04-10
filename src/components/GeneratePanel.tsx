@@ -7,6 +7,8 @@ import { Shop } from "@/hooks/useShops";
 import ShopSwitcher from "@/components/ShopSwitcher";
 import ThemePicker from "@/components/ThemePicker";
 import { PostTheme } from "@/lib/themes";
+import VoiceInput from "@/components/VoiceInput";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 interface Props {
   template: Template | null;
@@ -22,7 +24,22 @@ interface Props {
   onShopSelect: (shop: Shop) => void;
   selectedTheme: string | null;
   onThemeSelect: (theme: PostTheme) => void;
+  language: string;
+  onLanguageChange: (lang: string) => void;
+  showQr: boolean;
+  onShowQrChange: (v: boolean) => void;
 }
+
+const languages = [
+  { value: "english", label: "🇬🇧 English" },
+  { value: "tamil", label: "🇮🇳 Tamil" },
+  { value: "hindi", label: "🇮🇳 Hindi" },
+  { value: "spanish", label: "🇪🇸 Spanish" },
+  { value: "french", label: "🇫🇷 French" },
+  { value: "arabic", label: "🇸🇦 Arabic" },
+  { value: "telugu", label: "🇮🇳 Telugu" },
+  { value: "kannada", label: "🇮🇳 Kannada" },
+];
 
 const formats: { value: SocialFormat; label: string; size: string }[] = [
   { value: "instagram", label: "Instagram", size: "1080×1080" },
@@ -35,6 +52,8 @@ const GeneratePanel = ({
   onGenerate, isGenerating, hasGenerated,
   shops, activeShop, onShopSelect,
   selectedTheme, onThemeSelect,
+  language, onLanguageChange,
+  showQr, onShowQrChange,
 }: Props) => (
   <div className="space-y-5">
     <h2 className="font-display text-lg font-semibold text-foreground">Configure</h2>
@@ -55,15 +74,42 @@ const GeneratePanel = ({
     {/* Keywords */}
     <div className="space-y-2">
       <label className="text-sm font-medium text-muted-foreground">Keywords / Offer Details</label>
-      <Input
-        placeholder="e.g. 50% off summer sale, New menu..."
-        value={keywords}
-        onChange={(e) => onKeywordsChange(e.target.value)}
-        className="bg-secondary border-border"
-      />
+      <div className="flex gap-2">
+        <Input
+          placeholder="e.g. 50% off summer sale, New menu..."
+          value={keywords}
+          onChange={(e) => onKeywordsChange(e.target.value)}
+          className="bg-secondary border-border"
+        />
+        <VoiceInput onTranscript={(t) => onKeywordsChange(keywords ? `${keywords}, ${t}` : t)} />
+      </div>
     </div>
 
-    {/* Theme */}
+    {/* Language */}
+    <div className="space-y-2">
+      <label className="text-sm font-medium text-muted-foreground">Language</label>
+      <Select value={language} onValueChange={onLanguageChange}>
+        <SelectTrigger className="bg-secondary border-border">
+          <SelectValue />
+        </SelectTrigger>
+        <SelectContent>
+          {languages.map((l) => (
+            <SelectItem key={l.value} value={l.value}>{l.label}</SelectItem>
+          ))}
+        </SelectContent>
+      </Select>
+    </div>
+
+    {/* QR Code toggle */}
+    <label className="flex items-center gap-3 cursor-pointer">
+      <input
+        type="checkbox"
+        checked={showQr}
+        onChange={(e) => onShowQrChange(e.target.checked)}
+        className="h-4 w-4 rounded border-border accent-primary"
+      />
+      <span className="text-sm font-medium text-muted-foreground">Include QR code in post</span>
+    </label>
     <ThemePicker selected={selectedTheme} onSelect={onThemeSelect} />
 
     {/* Format */}
