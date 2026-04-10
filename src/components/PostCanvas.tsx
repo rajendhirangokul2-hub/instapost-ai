@@ -4,6 +4,7 @@ import CaptionGenerator from "@/components/CaptionGenerator";
 import { Button } from "@/components/ui/button";
 import { GeneratedPost, SocialFormat } from "@/types/post";
 import { useRef, useEffect } from "react";
+import { QRCodeSVG } from "qrcode-react";
 import { toPng, toJpeg, toSvg } from "html-to-image";
 import { jsPDF } from "jspdf";
 import { toast } from "sonner";
@@ -22,6 +23,8 @@ interface Props {
   templateId?: string;
   templateName?: string;
   keywords?: string;
+  showQr?: boolean;
+  qrValue?: string;
 }
 
 const aspectRatios: Record<SocialFormat, string> = {
@@ -44,7 +47,7 @@ const fontClassMap: Record<string, string> = {
   serif: "font-semibold text-2xl sm:text-4xl",
 };
 
-const PostCanvas = ({ post, format, isGenerating, templateId, templateName, keywords }: Props) => {
+const PostCanvas = ({ post, format, isGenerating, templateId, templateName, keywords, showQr, qrValue }: Props) => {
   const canvasRef = useRef<HTMLDivElement>(null);
   const { user } = useAuth();
   const { state: current, set, reset, undo, redo, canUndo, canRedo } = useHistory<GeneratedPost>(null);
@@ -178,6 +181,11 @@ const PostCanvas = ({ post, format, isGenerating, templateId, templateName, keyw
                   }}
                 />
               </div>
+              {showQr && qrValue && (
+                <div className="absolute bottom-3 left-4 rounded-md bg-white p-1.5">
+                  <QRCodeSVG value={qrValue} size={48} level="M" />
+                </div>
+              )}
               <div
                 className="absolute bottom-3 right-4 text-xs font-medium opacity-30"
                 style={{ color: current.colors.text }}
