@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { useAuth } from "@/hooks/useAuth";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
+import ThemeToggle from "@/components/ThemeToggle";
 
 const Header = () => {
   const { user, signOut } = useAuth();
@@ -31,6 +32,7 @@ const Header = () => {
         </div>
 
         <div className="flex items-center gap-3">
+          <ThemeToggle />
           {user ? (
             <>
               <Button

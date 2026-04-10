@@ -1,5 +1,6 @@
 import { motion, AnimatePresence } from "framer-motion";
 import { Download, Share2, Loader2, Bookmark, Undo2, Redo2, ChevronDown } from "lucide-react";
+import CaptionGenerator from "@/components/CaptionGenerator";
 import { Button } from "@/components/ui/button";
 import { GeneratedPost, SocialFormat } from "@/types/post";
 import { useRef, useEffect } from "react";
@@ -251,10 +252,27 @@ const PostCanvas = ({ post, format, isGenerating, templateId, templateName, keyw
             variant="outline"
             size="sm"
             className="gap-2 border-border text-foreground hover:bg-secondary"
-            onClick={() => toast.info("Sharing coming soon!")}
+            onClick={async () => {
+              if (!canvasRef.current) return;
+              try {
+                const dataUrl = await toPng(canvasRef.current, { pixelRatio: 2 });
+                const res = await fetch(dataUrl);
+                const blob = await res.blob();
+                const file = new File([blob], `postai-${format}.png`, { type: "image/png" });
+                if (navigator.canShare?.({ files: [file] })) {
+                  await navigator.share({ files: [file], title: "My PostAI Design" });
+                } else {
+                  await navigator.clipboard.write([new ClipboardItem({ "image/png": blob })]);
+                  toast.success("Image copied to clipboard!");
+                }
+              } catch (e: any) {
+                if (e?.name !== "AbortError") toast.error("Sharing failed");
+              }
+            }}
           >
             <Share2 className="h-4 w-4" /> Share
           </Button>
+          {current && <CaptionGenerator post={current} />}
         </motion.div>
       )}
     </div>
