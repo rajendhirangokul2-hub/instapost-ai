@@ -12,7 +12,7 @@ serve(async (req) => {
   }
 
   try {
-    const { category, keywords, templateName, shop, theme, brandKit } = await req.json();
+    const { category, keywords, templateName, shop, theme, brandKit, language } = await req.json();
 
     if (!category || !templateName) {
       return new Response(
@@ -46,11 +46,15 @@ serve(async (req) => {
       themeContext = `\n\nTHEME: "${theme.name}"\n- Suggested colors: bg=${theme.colors.bg}, text=${theme.colors.text}, accent=${theme.colors.accent}, ctaBg=${theme.colors.ctaBg}\n- Suggested font: ${theme.fontStyle}\n- Suggested layout: ${theme.layout}\n${shop ? "Blend the theme style with the brand colors — brand colors take priority but use the theme's aesthetic." : "Use these theme colors and style."}`;
     }
 
+    const langInstruction = language && language !== "english"
+      ? `\n\nIMPORTANT: Generate ALL text content (headline, subtext, CTA) in ${language.toUpperCase()}. The post must be written entirely in ${language}.`
+      : "";
+
     const userPrompt = `Generate a social media post for:
 - Category: ${category}
 - Template style: ${templateName}
 - Keywords/Details: ${keywords || "general"}
-${shopContext}${brandContext}${themeContext}
+${shopContext}${brandContext}${themeContext}${langInstruction}
 
 Create compelling, professional content with:
 1. A catchy headline (2-4 words per line, max 2 lines, use actual newline characters for line breaks)
