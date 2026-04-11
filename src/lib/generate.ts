@@ -9,6 +9,7 @@ export async function generatePost(
   shop?: Shop,
   theme?: PostTheme,
   language: string = "english",
+  tone: string = "formal",
 ): Promise<GeneratedPost> {
   const { data, error } = await supabase.functions.invoke("generate-post", {
     body: {
@@ -16,6 +17,7 @@ export async function generatePost(
       keywords,
       templateName: template.name,
       language,
+      tone,
       shop: shop
         ? {
             name: shop.name,

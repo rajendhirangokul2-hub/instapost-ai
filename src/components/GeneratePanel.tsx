@@ -112,7 +112,27 @@ const GeneratePanel = ({
       </Select>
     </div>
 
-    {/* QR Code toggle */}
+    {/* Tone */}
+    <div className="space-y-2">
+      <label className="text-sm font-medium text-muted-foreground">Tone</label>
+      <div className="grid grid-cols-4 gap-2">
+        {tones.map((t) => (
+          <button
+            key={t.value}
+            onClick={() => onToneChange(t.value)}
+            className={`rounded-lg px-2 py-2 text-center text-xs transition-all ${
+              tone === t.value
+                ? "bg-primary text-primary-foreground"
+                : "bg-secondary text-secondary-foreground hover:bg-secondary/80"
+            }`}
+          >
+            <div className="text-base">{t.icon}</div>
+            <div className="font-medium">{t.label}</div>
+          </button>
+        ))}
+      </div>
+    </div>
+
     <label className="flex items-center gap-3 cursor-pointer">
       <input
         type="checkbox"
