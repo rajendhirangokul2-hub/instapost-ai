@@ -1,5 +1,5 @@
 import { motion } from "framer-motion";
-import { Sparkles, LogIn, LogOut, BookmarkCheck, Store, History } from "lucide-react";
+import { Sparkles, LogIn, LogOut, BookmarkCheck, Store, History, CalendarDays } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/hooks/useAuth";
 import { useNavigate } from "react-router-dom";
@@ -61,6 +61,15 @@ const Header = () => {
               >
                 <History className="h-4 w-4" />
                 <span className="hidden sm:inline">History</span>
+              </Button>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => navigate("/schedule")}
+                className="gap-2 text-muted-foreground hover:text-foreground"
+              >
+                <CalendarDays className="h-4 w-4" />
+                <span className="hidden sm:inline">Schedule</span>
               </Button>
               <span className="hidden text-sm text-muted-foreground sm:block">
                 {user.email}

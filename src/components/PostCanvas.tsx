@@ -1,6 +1,7 @@
 import { motion, AnimatePresence } from "framer-motion";
 import { Download, Share2, Loader2, Bookmark, Undo2, Redo2, ChevronDown } from "lucide-react";
 import CaptionGenerator from "@/components/CaptionGenerator";
+import ScheduleDialog from "@/components/ScheduleDialog";
 import { Button } from "@/components/ui/button";
 import { GeneratedPost, SocialFormat } from "@/types/post";
 import { useRef, useEffect } from "react";
@@ -281,6 +282,9 @@ const PostCanvas = ({ post, format, isGenerating, templateId, templateName, keyw
             <Share2 className="h-4 w-4" /> Share
           </Button>
           {current && <CaptionGenerator post={current} />}
+          {current && templateId && (
+            <ScheduleDialog post={current} templateId={templateId} templateName={templateName} format={format} keywords={keywords} />
+          )}
         </motion.div>
       )}
     </div>
