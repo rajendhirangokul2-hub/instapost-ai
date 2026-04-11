@@ -2,7 +2,7 @@ import { useState } from "react";
 import { motion } from "framer-motion";
 import Header from "@/components/Header";
 import TemplateGallery from "@/components/TemplateGallery";
-import GeneratePanel from "@/components/GeneratePanel";
+import GeneratePanel, { Tone } from "@/components/GeneratePanel";
 import PostCanvas from "@/components/PostCanvas";
 import { Template, SocialFormat, GeneratedPost } from "@/types/post";
 import { generatePost } from "@/lib/generate";
@@ -19,13 +19,14 @@ const Index = () => {
   const [selectedTheme, setSelectedTheme] = useState<PostTheme | null>(null);
   const [language, setLanguage] = useState("english");
   const [showQr, setShowQr] = useState(false);
+  const [tone, setTone] = useState<Tone>("formal");
   const { shops, activeShop, selectShop } = useShops();
 
   const handleGenerate = async () => {
     if (!template) { toast.error("Please select a template first"); return; }
     setIsGenerating(true);
     try {
-      const post = await generatePost(template, keywords, activeShop ?? undefined, selectedTheme ?? undefined, language);
+      const post = await generatePost(template, keywords, activeShop ?? undefined, selectedTheme ?? undefined, language, tone);
       setGenerated(post);
       toast.success("Post generated successfully!");
     } catch {
@@ -72,6 +73,8 @@ const Index = () => {
                 onLanguageChange={setLanguage}
                 showQr={showQr}
                 onShowQrChange={setShowQr}
+                tone={tone}
+                onToneChange={setTone}
               />
             </div>
           </div>
