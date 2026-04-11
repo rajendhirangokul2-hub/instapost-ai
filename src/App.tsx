@@ -7,6 +7,7 @@ import { AuthProvider } from "@/hooks/useAuth";
 import Index from "./pages/Index.tsx";
 import Auth from "./pages/Auth.tsx";
 import SavedPosts from "./pages/SavedPosts.tsx";
+import History from "./pages/History.tsx";
 import BrandKit from "./pages/BrandKit.tsx";
 import Shops from "./pages/Shops.tsx";
 import Onboarding from "./pages/Onboarding.tsx";
@@ -25,6 +26,7 @@ const App = () => (
             <Route path="/" element={<Index />} />
             <Route path="/auth" element={<Auth />} />
             <Route path="/saved" element={<SavedPosts />} />
+            <Route path="/history" element={<History />} />
             <Route path="/brand-kit" element={<BrandKit />} />
             <Route path="/shops" element={<Shops />} />
             <Route path="/onboarding" element={<Onboarding />} />
