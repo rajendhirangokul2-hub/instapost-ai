@@ -137,6 +137,69 @@ export type Database = {
         }
         Relationships: []
       }
+      scheduled_posts: {
+        Row: {
+          colors: Json
+          created_at: string
+          cta: string
+          font_style: string
+          format: string
+          headline: string
+          id: string
+          keywords: string | null
+          layout: string
+          notes: string | null
+          platform: string
+          scheduled_at: string
+          status: string
+          subtext: string
+          template_id: string
+          template_name: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          colors: Json
+          created_at?: string
+          cta: string
+          font_style: string
+          format?: string
+          headline: string
+          id?: string
+          keywords?: string | null
+          layout: string
+          notes?: string | null
+          platform?: string
+          scheduled_at: string
+          status?: string
+          subtext: string
+          template_id: string
+          template_name: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          colors?: Json
+          created_at?: string
+          cta?: string
+          font_style?: string
+          format?: string
+          headline?: string
+          id?: string
+          keywords?: string | null
+          layout?: string
+          notes?: string | null
+          platform?: string
+          scheduled_at?: string
+          status?: string
+          subtext?: string
+          template_id?: string
+          template_name?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       shops: {
         Row: {
           accent_color: string
