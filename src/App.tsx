@@ -10,6 +10,7 @@ import SavedPosts from "./pages/SavedPosts.tsx";
 import History from "./pages/History.tsx";
 import BrandKit from "./pages/BrandKit.tsx";
 import Shops from "./pages/Shops.tsx";
+import Schedule from "./pages/Schedule.tsx";
 import Onboarding from "./pages/Onboarding.tsx";
 import NotFound from "./pages/NotFound.tsx";
 
@@ -27,6 +28,7 @@ const App = () => (
             <Route path="/auth" element={<Auth />} />
             <Route path="/saved" element={<SavedPosts />} />
             <Route path="/history" element={<History />} />
+            <Route path="/schedule" element={<Schedule />} />
             <Route path="/brand-kit" element={<BrandKit />} />
             <Route path="/shops" element={<Shops />} />
             <Route path="/onboarding" element={<Onboarding />} />
