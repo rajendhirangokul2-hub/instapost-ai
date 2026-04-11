@@ -10,6 +10,8 @@ import { PostTheme } from "@/lib/themes";
 import VoiceInput from "@/components/VoiceInput";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
+export type Tone = "formal" | "fun" | "premium" | "local";
+
 interface Props {
   template: Template | null;
   keywords: string;
@@ -28,6 +30,8 @@ interface Props {
   onLanguageChange: (lang: string) => void;
   showQr: boolean;
   onShowQrChange: (v: boolean) => void;
+  tone: Tone;
+  onToneChange: (t: Tone) => void;
 }
 
 const languages = [
@@ -47,6 +51,13 @@ const formats: { value: SocialFormat; label: string; size: string }[] = [
   { value: "twitter", label: "Twitter/X", size: "1200×675" },
 ];
 
+const tones: { value: Tone; label: string; icon: string }[] = [
+  { value: "formal", label: "Formal", icon: "🏢" },
+  { value: "fun", label: "Fun", icon: "🎉" },
+  { value: "premium", label: "Premium", icon: "👑" },
+  { value: "local", label: "Local", icon: "🏘️" },
+];
+
 const GeneratePanel = ({
   template, keywords, onKeywordsChange, format, onFormatChange,
   onGenerate, isGenerating, hasGenerated,
@@ -54,6 +65,7 @@ const GeneratePanel = ({
   selectedTheme, onThemeSelect,
   language, onLanguageChange,
   showQr, onShowQrChange,
+  tone, onToneChange,
 }: Props) => (
   <div className="space-y-5">
     <h2 className="font-display text-lg font-semibold text-foreground">Configure</h2>
