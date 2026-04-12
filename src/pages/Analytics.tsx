@@ -7,6 +7,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { useNavigate } from "react-router-dom";
 import Header from "@/components/Header";
+import AnalyticsExport from "@/components/AnalyticsExport";
 import { format, subDays, startOfDay } from "date-fns";
 import {
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell,
@@ -83,6 +84,9 @@ const Analytics = () => {
             <ArrowLeft className="h-4 w-4" />
           </Button>
           <h2 className="font-display text-2xl font-bold text-foreground">Analytics</h2>
+          <div className="ml-auto">
+            <AnalyticsExport data={{ totalPosts, topTemplate, templatesUsed: templateMap.size, scheduledCount, templateData, formatData, trendData }} />
+          </div>
         </div>
 
         {loading ? (
