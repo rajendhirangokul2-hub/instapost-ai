@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { ArrowLeft, Loader2, Trash2, CheckCircle2, Clock, CalendarDays } from "lucide-react";
+import { ArrowLeft, Loader2, Trash2, CheckCircle2, Clock, CalendarDays, LayoutGrid, Calendar } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
@@ -8,6 +8,7 @@ import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 import { format, isPast } from "date-fns";
 import Header from "@/components/Header";
+import ScheduleCalendar from "@/components/ScheduleCalendar";
 
 interface ScheduledPost {
   id: string;
@@ -34,6 +35,7 @@ const platformIcons: Record<string, string> = {
 const Schedule = () => {
   const [posts, setPosts] = useState<ScheduledPost[]>([]);
   const [loading, setLoading] = useState(true);
+  const [view, setView] = useState<"list" | "calendar">("list");
   const { user } = useAuth();
   const navigate = useNavigate();
 
@@ -87,6 +89,14 @@ const Schedule = () => {
           </Button>
           <h2 className="font-display text-2xl font-bold text-foreground">Scheduled Posts</h2>
           <span className="text-sm text-muted-foreground">({posts.length} total)</span>
+          <div className="ml-auto flex gap-1">
+            <Button variant={view === "list" ? "default" : "outline"} size="icon" onClick={() => setView("list")}>
+              <LayoutGrid className="h-4 w-4" />
+            </Button>
+            <Button variant={view === "calendar" ? "default" : "outline"} size="icon" onClick={() => setView("calendar")}>
+              <Calendar className="h-4 w-4" />
+            </Button>
+          </div>
         </div>
 
         {loading ? (
@@ -101,6 +111,8 @@ const Schedule = () => {
               Create a Post
             </Button>
           </div>
+        ) : view === "calendar" ? (
+          <ScheduleCalendar posts={posts} />
         ) : (
           <div className="space-y-8">
             {/* Overdue */}
