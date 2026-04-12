@@ -8,6 +8,7 @@ import { Template, SocialFormat, GeneratedPost } from "@/types/post";
 import { generatePost } from "@/lib/generate";
 import { useShops } from "@/hooks/useShops";
 import { PostTheme } from "@/lib/themes";
+import { useScheduleNotifications } from "@/hooks/useScheduleNotifications";
 import { toast } from "sonner";
 
 const Index = () => {
@@ -21,6 +22,7 @@ const Index = () => {
   const [showQr, setShowQr] = useState(false);
   const [tone, setTone] = useState<Tone>("formal");
   const { shops, activeShop, selectShop } = useShops();
+  useScheduleNotifications();
 
   const handleGenerate = async () => {
     if (!template) { toast.error("Please select a template first"); return; }

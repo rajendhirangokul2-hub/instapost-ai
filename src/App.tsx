@@ -11,6 +11,7 @@ import History from "./pages/History.tsx";
 import BrandKit from "./pages/BrandKit.tsx";
 import Shops from "./pages/Shops.tsx";
 import Schedule from "./pages/Schedule.tsx";
+import Analytics from "./pages/Analytics.tsx";
 import Onboarding from "./pages/Onboarding.tsx";
 import NotFound from "./pages/NotFound.tsx";
 
@@ -29,6 +30,7 @@ const App = () => (
             <Route path="/saved" element={<SavedPosts />} />
             <Route path="/history" element={<History />} />
             <Route path="/schedule" element={<Schedule />} />
+            <Route path="/analytics" element={<Analytics />} />
             <Route path="/brand-kit" element={<BrandKit />} />
             <Route path="/shops" element={<Shops />} />
             <Route path="/onboarding" element={<Onboarding />} />
