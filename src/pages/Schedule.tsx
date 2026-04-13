@@ -112,7 +112,7 @@ const Schedule = () => {
             </Button>
           </div>
         ) : view === "calendar" ? (
-          <ScheduleCalendar posts={posts} />
+          <ScheduleCalendar posts={posts} onPostUpdated={fetchPosts} />
         ) : (
           <div className="space-y-8">
             {/* Overdue */}
