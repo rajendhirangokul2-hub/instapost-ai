@@ -125,6 +125,14 @@ export default function ScheduleCalendar({ posts, onPostUpdated }: Props) {
             >
               Week
             </Button>
+            <Button
+              variant="outline"
+              size="sm"
+              className="h-6 px-2 text-xs"
+              onClick={() => setCurrentDate(new Date())}
+            >
+              Today
+            </Button>
           </div>
         </div>
         <Button variant="ghost" size="icon" onClick={() => navigate(1)}>
