@@ -26,28 +26,25 @@ serve(async (req) => {
       throw new Error("LOVABLE_API_KEY is not configured");
     }
 
-    const systemPrompt = `You are a professional social media copywriter and designer. Generate social media post content based on the given template category, business details, and keywords. You must respond using the generate_post tool.`;
+    const systemPrompt = `You are a professional social media copywriter and designer. Generate social media post content with a CLEAN, WELL-STRUCTURED layout. Each section must be clearly separated — never mix content into one paragraph. You must respond using the generate_post tool.`;
 
-    // Build context from shop details (smart placeholders)
     let shopContext = "";
     if (shop) {
-      shopContext = `\n\nBUSINESS DETAILS (MUST incorporate into the post):\n- Business Name: ${shop.name}\n- Category: ${shop.category}\n- Address: ${shop.address || "N/A"}\n- Phone: ${shop.phone || "N/A"}\n\nIMPORTANT: Include the business name prominently in the headline or subtext. If address and phone are provided, include them in the subtext naturally.\n\nBRAND COLORS:\n- Primary: ${shop.primaryColor}\n- Secondary: ${shop.secondaryColor}\n- Accent: ${shop.accentColor}\n- Background: ${shop.backgroundColor}\n- Text: ${shop.textColor}\n- Font Style: ${shop.fontStyle}\n\nUse these exact brand colors. bg = background color, text = text color, accent = accent color, ctaBg = primary color.`;
+      shopContext = `\n\nBUSINESS DETAILS (MUST incorporate into the post):\n- Business Name: ${shop.name}\n- Category: ${shop.category}\n- Address: ${shop.address || "N/A"}\n- Phone: ${shop.phone || "N/A"}\n\nIMPORTANT: Include the business name prominently. Put address and phone in the dedicated fields.\n\nBRAND COLORS:\n- Primary: ${shop.primaryColor}\n- Secondary: ${shop.secondaryColor}\n- Accent: ${shop.accentColor}\n- Background: ${shop.backgroundColor}\n- Text: ${shop.textColor}\n- Font Style: ${shop.fontStyle}\n\nUse these exact brand colors. bg = background color, text = text color, accent = accent color, ctaBg = primary color.`;
     }
 
-    // Legacy brand kit support
     let brandContext = "";
     if (!shop && brandKit) {
       brandContext = `\n\nBRAND KIT COLORS:\n- Primary: ${brandKit.primaryColor}\n- Secondary: ${brandKit.secondaryColor}\n- Accent: ${brandKit.accentColor}\n- Background: ${brandKit.backgroundColor}\n- Text: ${brandKit.textColor}\n- Font Style: ${brandKit.fontStyle}\n- Brand Name: ${brandKit.name}\n\nUse these exact colors.`;
     }
 
-    // Theme context
     let themeContext = "";
     if (theme) {
       themeContext = `\n\nTHEME: "${theme.name}"\n- Suggested colors: bg=${theme.colors.bg}, text=${theme.colors.text}, accent=${theme.colors.accent}, ctaBg=${theme.colors.ctaBg}\n- Suggested font: ${theme.fontStyle}\n- Suggested layout: ${theme.layout}\n${shop ? "Blend the theme style with the brand colors — brand colors take priority but use the theme's aesthetic." : "Use these theme colors and style."}`;
     }
 
     const langInstruction = language && language !== "english"
-      ? `\n\nIMPORTANT: Generate ALL text content (headline, subtext, CTA) in ${language.toUpperCase()}. The post must be written entirely in ${language}.`
+      ? `\n\nIMPORTANT: Generate ALL text content (headline, subheadline, description, offer, CTA) in ${language.toUpperCase()}. The post must be written entirely in ${language}.`
       : "";
 
     const toneInstruction = tone
@@ -60,17 +57,21 @@ serve(async (req) => {
 - Keywords/Details: ${keywords || "general"}
 ${shopContext}${brandContext}${themeContext}${langInstruction}${toneInstruction}
 
-Create compelling, professional content with:
-1. A catchy headline (2-4 words per line, max 2 lines, use actual newline characters for line breaks)
-2. Supporting description text (1-2 sentences, engaging and action-oriented)${shop?.address || shop?.phone ? " Include business contact info naturally." : ""}
-3. A clear call-to-action button text (short, compelling)
-4. A color palette${shop ? " using the brand colors" : theme ? " using the theme colors" : ` matching the ${category} theme`}
-5. Layout choice: "centered", "left-aligned", or "split"
-6. Font style: ${shop ? `"${shop.fontStyle}" (brand preference)` : theme ? `"${theme.fontStyle}" (theme preference)` : '"bold", "elegant", "playful", "mono", or "serif"'}
+STRICT FORMAT RULES:
+1. HEADLINE: Big & catchy, maximum 6-8 words. Use newline characters for line breaks.
+2. SUBHEADLINE: Short supporting line (1 short sentence). Optional but recommended.
+3. DESCRIPTION: 1-2 short lines ONLY. Focus on value. Do NOT mix address/phone here.
+4. OFFER: Clearly state discount or benefit if applicable (e.g. "Get Flat 50% OFF"). Leave empty string if no offer.
+5. CTA: Short and strong call-to-action (e.g. "Register Now", "Order Today").
+6. BUSINESS NAME: The shop/business name.${shop ? ` Use "${shop.name}".` : ""}
+7. ADDRESS: Business address on its own.${shop?.address ? ` Use "${shop.address}".` : " Leave empty if unknown."}
+8. PHONE: Business phone on its own.${shop?.phone ? ` Use "${shop.phone}".` : " Leave empty if unknown."}
+9. QR_TEXT: A short line like "Scan QR to Register" or "Scan QR for Details". Always provide this.
+10. Colors: hex codes for bg, text, accent, ctaBg.
+11. Layout: "centered", "left-aligned", or "split".
+12. Font style: ${shop ? `"${shop.fontStyle}"` : theme ? `"${theme.fontStyle}"` : '"bold", "elegant", "playful", "mono", or "serif"'}
 
-IMPORTANT: For the headline, use actual newline characters (not the literal text "\\n") if you want line breaks.
-
-Make the content unique, professional, and ready to post. Colors should be hex codes.`;
+CRITICAL: Keep each field separate. Do NOT merge address/phone into description. Keep it clean and poster-ready.`;
 
     const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
       method: "POST",
@@ -89,13 +90,19 @@ Make the content unique, professional, and ready to post. Colors should be hex c
             type: "function",
             function: {
               name: "generate_post",
-              description: "Generate a complete social media post with content and design",
+              description: "Generate a complete social media post with clearly separated content sections",
               parameters: {
                 type: "object",
                 properties: {
-                  headline: { type: "string", description: "Catchy headline. Use actual newline characters for line breaks, not literal backslash-n." },
-                  subtext: { type: "string", description: "Supporting description, 1-2 sentences. Include business address/phone if provided." },
-                  cta: { type: "string", description: "Call-to-action button text" },
+                  headline: { type: "string", description: "Big catchy headline, 6-8 words max. Use actual newline chars for line breaks." },
+                  subheadline: { type: "string", description: "Short supporting line under the headline. 1 sentence max." },
+                  subtext: { type: "string", description: "1-2 short description lines. Value-focused. Do NOT include address or phone here." },
+                  offer: { type: "string", description: "Discount or benefit highlight, e.g. 'Get Flat 50% OFF'. Empty string if none." },
+                  cta: { type: "string", description: "Short call-to-action button text" },
+                  businessName: { type: "string", description: "The business/shop name" },
+                  address: { type: "string", description: "Business address, standalone" },
+                  phone: { type: "string", description: "Business phone number, standalone" },
+                  qrText: { type: "string", description: "QR code instruction text, e.g. 'Scan QR to Register'" },
                   colors: {
                     type: "object",
                     properties: {
@@ -109,7 +116,7 @@ Make the content unique, professional, and ready to post. Colors should be hex c
                   layout: { type: "string", enum: ["centered", "left-aligned", "split"] },
                   fontStyle: { type: "string", enum: ["bold", "elegant", "playful", "mono", "serif"] },
                 },
-                required: ["headline", "subtext", "cta", "colors", "layout", "fontStyle"],
+                required: ["headline", "subtext", "cta", "colors", "layout", "fontStyle", "subheadline", "offer", "businessName", "address", "phone", "qrText"],
                 additionalProperties: false,
               },
             },

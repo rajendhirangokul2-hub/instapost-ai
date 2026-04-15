@@ -11,8 +11,14 @@ export interface Template {
 
 export interface GeneratedPost {
   headline: string;
+  subheadline?: string;
   subtext: string;
+  offer?: string;
   cta: string;
+  businessName?: string;
+  address?: string;
+  phone?: string;
+  qrText?: string;
   colors: {
     bg: string;
     text: string;
