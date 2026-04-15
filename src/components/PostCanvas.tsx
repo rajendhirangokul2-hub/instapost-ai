@@ -114,6 +114,14 @@ const PostCanvas = ({ post, format, isGenerating, templateId, templateName, keyw
     else toast.success("Post saved!");
   };
 
+  const isLightBg = (hex: string) => {
+    const c = hex.replace("#", "");
+    const r = parseInt(c.substring(0, 2), 16);
+    const g = parseInt(c.substring(2, 4), 16);
+    const b = parseInt(c.substring(4, 6), 16);
+    return (r * 299 + g * 587 + b * 114) / 1000 > 150;
+  };
+
   return (
     <div className="flex flex-col items-center gap-4">
       <div className={`w-full max-w-lg ${aspectRatios[format]} relative overflow-hidden rounded-xl`}>
@@ -137,22 +145,24 @@ const PostCanvas = ({ post, format, isGenerating, templateId, templateName, keyw
               exit={{ opacity: 0 }}
               transition={{ type: "spring", duration: 0.6 }}
               ref={canvasRef}
-              className="absolute inset-0 flex flex-col items-center justify-center p-8 sm:p-12 rounded-xl"
+              className="absolute inset-0 flex flex-col rounded-xl overflow-hidden"
               style={{ backgroundColor: current.colors.bg }}
             >
+              {/* Accent bar */}
+              <div className="h-1.5 w-full flex-shrink-0" style={{ backgroundColor: current.colors.accent }} />
+
+              {/* Main content area */}
               <div
-                className="absolute top-0 left-0 h-1.5 w-full"
-                style={{ backgroundColor: current.colors.accent }}
-              />
-              <div
-                className={`flex flex-1 flex-col gap-5 w-full ${
+                className={`flex flex-1 flex-col px-8 sm:px-10 pt-6 sm:pt-8 pb-16 ${
                   current.layout === "centered"
                     ? "items-center justify-center text-center"
                     : current.layout === "left-aligned"
                     ? "items-start justify-center text-left"
                     : "items-start justify-end text-left"
                 }`}
+                style={{ gap: 0 }}
               >
+                {/* HEADLINE */}
                 <InlineEdit
                   value={current.headline}
                   onChange={(v) => update("headline", v)}
@@ -163,30 +173,90 @@ const PostCanvas = ({ post, format, isGenerating, templateId, templateName, keyw
                     fontFamily: fontFamilyMap[current.fontStyle] || "inherit",
                   }}
                 />
+
+                {/* SUBHEADLINE */}
+                {current.subheadline && (
+                  <InlineEdit
+                    value={current.subheadline}
+                    onChange={(v) => update("subheadline", v)}
+                    className="mt-2 text-sm sm:text-base font-medium opacity-75"
+                    style={{ color: current.colors.text }}
+                  />
+                )}
+
+                {/* DESCRIPTION */}
                 <InlineEdit
                   value={current.subtext}
                   onChange={(v) => update("subtext", v)}
                   multiline
-                  className="max-w-md text-sm sm:text-base leading-relaxed opacity-85"
+                  className="mt-3 max-w-md text-xs sm:text-sm leading-relaxed opacity-85"
                   style={{ color: current.colors.text }}
                 />
+
+                {/* OFFER */}
+                {current.offer && (
+                  <div
+                    className="mt-3 rounded-md px-4 py-1.5 text-sm sm:text-base font-bold tracking-wide"
+                    style={{
+                      backgroundColor: current.colors.accent,
+                      color: isLightBg(current.colors.accent) ? "#1a1a1a" : "#ffffff",
+                    }}
+                  >
+                    <InlineEdit
+                      value={current.offer}
+                      onChange={(v) => update("offer", v)}
+                      style={{ color: "inherit" }}
+                    />
+                  </div>
+                )}
+
+                {/* CTA */}
                 <InlineEdit
                   value={current.cta}
                   onChange={(v) => update("cta", v)}
-                  className="mt-2 rounded-lg px-6 py-2.5 text-sm font-bold uppercase tracking-wide"
+                  className="mt-4 rounded-lg px-6 py-2.5 text-xs sm:text-sm font-bold uppercase tracking-wide"
                   style={{
                     backgroundColor: current.colors.ctaBg,
-                    color: current.colors.bg === "#FFFFFF" || current.colors.bg === "#FAFAF9" || current.colors.bg === "#FEF3C7" || current.colors.bg === "#FFF1F2" || current.colors.bg === "#ECFDF5" || current.colors.bg === "#F0F9FF"
-                      ? "#FFFFFF"
-                      : current.colors.text,
+                    color: isLightBg(current.colors.ctaBg) ? "#1a1a1a" : "#ffffff",
                   }}
                 />
+
+                {/* BUSINESS DETAILS BLOCK */}
+                {(current.businessName || current.address || current.phone) && (
+                  <div
+                    className="mt-4 rounded-md px-4 py-2 text-xs sm:text-[11px] leading-relaxed opacity-80"
+                    style={{
+                      color: current.colors.text,
+                      backgroundColor: `${current.colors.text}10`,
+                    }}
+                  >
+                    {current.businessName && (
+                      <div className="font-bold text-xs sm:text-sm">{current.businessName}</div>
+                    )}
+                    {current.address && <div>📍 {current.address}</div>}
+                    {current.phone && <div>📞 {current.phone}</div>}
+                  </div>
+                )}
               </div>
+
+              {/* QR Code + QR Text */}
               {showQr && qrValue && (
-                <div className="absolute bottom-3 left-4 rounded-md bg-white p-1.5">
-                  <QRCodeSVG value={qrValue} size={48} level="M" />
+                <div className="absolute bottom-3 left-4 flex items-end gap-2">
+                  <div className="rounded-md bg-white p-1.5">
+                    <QRCodeSVG value={qrValue} size={48} level="M" />
+                  </div>
+                  {current.qrText && (
+                    <span
+                      className="text-[9px] font-medium opacity-60 max-w-[100px] leading-tight"
+                      style={{ color: current.colors.text }}
+                    >
+                      {current.qrText}
+                    </span>
+                  )}
                 </div>
               )}
+
+              {/* Watermark */}
               <div
                 className="absolute bottom-3 right-4 text-xs font-medium opacity-30"
                 style={{ color: current.colors.text }}
